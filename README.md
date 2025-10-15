@@ -1,13 +1,29 @@
-# Video Category Classification
+# YouTube Video Analysis Pipeline
 
-A machine learning project that classifies YouTube video categories based on English transcripts using natural language processing and traditional ML algorithms.
+A comprehensive machine learning project for YouTube video content analysis, featuring end-to-end automated processing from video URLs to category classification.
 
 ## 📋 Overview
 
-This project implements a text classification system that analyzes YouTube video transcripts to automatically categorize videos into different content categories (e.g., Music, Education, Gaming, News, etc.). The system uses TF-IDF vectorization and SVM classification to achieve video categorization.
+This project implements a complete pipeline for analyzing YouTube videos:
+
+1. **Data Collection**: Extract video IDs from CSV datasets
+2. **Audio Download**: Download audio files using yt-dlp
+3. **Speech-to-Text**: Transcribe audio using OpenAI Whisper model
+4. **Translation**: Convert transcripts to English using Google Translate API
+5. **Text Classification**: Categorize videos using machine learning models
+
+The system uses TF-IDF vectorization and SVM classification for the final categorization step, achieving automated video content analysis.
 
 ## 🚀 Features
 
+### Complete Pipeline (`mark_of_youtube_transcript_project.py`)
+- **Automated Data Collection**: Extract video IDs from YouTube URLs or CSV datasets
+- **Audio Download**: Batch download audio files using yt-dlp with cookie support
+- **Speech Recognition**: Convert audio to text using OpenAI Whisper (tiny model)
+- **Multi-language Support**: Automatic translation to English using Google Translate API
+- **Smart Text Processing**: Chunk-based translation to handle API limits safely
+
+### Classification System
 - **Multi-dataset Integration**: Combines multiple CSV datasets containing video transcripts and categories
 - **Text Preprocessing**: Comprehensive text cleaning and normalization pipeline
 - **Multiple ML Algorithms**: Compares Logistic Regression, Random Forest, and SVM models
@@ -17,7 +33,8 @@ This project implements a text classification system that analyzes YouTube video
 
 ## 📊 Dataset
 
-The project uses multiple YouTube transcript datasets:
+### Existing Classification Datasets
+The project uses multiple YouTube transcript datasets for training:
 - `TAP_transcript_en.csv`
 - `youtube_data_transcript.csv`
 - `youtube_data_transcripted_en_pun.csv`
@@ -28,6 +45,11 @@ Each dataset should contain at least two columns:
 - `transcript_en`: The video transcript text in English
 - `category`: The video category label
 
+### Pipeline Input Format
+For the complete pipeline (`mark_of_youtube_transcript_project.py`), input should be:
+- A CSV file with YouTube video data containing `video_id` or `url` columns
+- Optional: Pre-existing `category` column for supervised learning
+
 ## 🛠 Installation
 
 ### Prerequisites
@@ -37,26 +59,81 @@ Each dataset should contain at least two columns:
 
 ### Dependencies
 
-Install the required packages:
-
+#### For Classification System Only:
 ```bash
 pip install pandas numpy scikit-learn joblib matplotlib seaborn
+```
+
+#### For Complete Pipeline (Google Colab):
+```bash
+pip install yt-dlp transformers librosa soundfile torch deep-translator
 ```
 
 Or create a requirements.txt file with:
 
 ```
+# Core ML dependencies
 pandas>=1.3.0
 numpy>=1.21.0
 scikit-learn>=1.0.0
 joblib>=1.1.0
 matplotlib>=3.5.0
 seaborn>=0.11.0
+
+# Complete pipeline dependencies (Colab only)
+yt-dlp>=2023.0.0
+transformers>=4.20.0
+librosa>=0.9.0
+soundfile>=0.10.0
+torch>=1.12.0
+deep-translator>=1.9.0
 ```
 
 ## 📖 Usage
 
-### 1. Training the Model
+### Complete Pipeline Workflow (`mark_of_youtube_transcript_project.py`)
+
+This Google Colab notebook provides a comprehensive end-to-end solution for YouTube video analysis. **Note**: This script is designed to run in Google Colab environment.
+
+#### Step 1: Data Preparation
+- Upload your YouTube video dataset (CSV with video IDs or URLs)
+- Extract video IDs from URLs if needed
+- Set up Google Drive paths for data storage
+
+#### Step 2: Audio Download
+- Configure yt-dlp with cookies for authenticated downloads
+- Download audio files in MP3 format
+- Batch processing with progress tracking and error handling
+
+#### Step 3: Speech-to-Text Transcription
+- Load OpenAI Whisper model (tiny version for efficiency)
+- Transcribe audio files to text with timestamps
+- Incremental saving to prevent data loss
+- Resume capability for interrupted processing
+
+#### Step 4: Translation to English
+- Use Google Translate API with chunking for long texts
+- Safe processing with rate limiting and error handling
+- Automatic language detection and translation
+
+#### Step 5: Video Categorization
+- Bag-of-Words vectorization with stop words removal
+- Logistic Regression classification
+- Performance analysis and visualization
+- Word frequency analysis per category
+
+#### Running the Complete Pipeline:
+```bash
+# This script is designed for Google Colab
+# 1. Open in Google Colab
+# 2. Mount Google Drive
+# 3. Update file paths in the script
+# 4. Run cells sequentially
+```
+
+### Classification System Usage
+
+#### 1. Training the Model
 
 Run the classification pipeline to train and evaluate models:
 
@@ -104,25 +181,26 @@ python model_analysis.py
 ## 📁 Project Structure
 
 ```
-video-category-classification/
+youtube-analysis-pipeline/
 │
-├── video_category_classifier.py    # Main training pipeline
-├── predict_video_category.py       # Prediction interface
-├── test_prediction.py             # Model testing script
-├── model_analysis.py              # Performance analysis
+├── mark_of_youtube_transcript_project.py  # Complete pipeline (Colab)
+├── video_category_classifier.py           # Classification training pipeline
+├── predict_video_category.py              # Prediction interface
+├── test_prediction.py                     # Model testing script
+├── model_analysis.py                      # Performance analysis
 │
-├── tfidf_vectorizer.pkl           # Saved TF-IDF vectorizer
-├── video_category_model_svm.pkl   # Trained SVM model
-├── confusion_matrix_svm.png       # Confusion matrix visualization
+├── tfidf_vectorizer.pkl                   # Saved TF-IDF vectorizer
+├── video_category_model_svm.pkl           # Trained SVM model
+├── confusion_matrix_svm.png               # Confusion matrix visualization
 │
-├── TAP_transcript_en.csv          # Training datasets
+├── TAP_transcript_en.csv                  # Training datasets
 ├── youtube_data_transcript.csv
 ├── youtube_data_transcripted_en_pun.csv
 ├── youtube_transcript_en_trained.csv
 ├── youtube_transcript_for_trained.csv
 │
-├── __pycache__/                   # Python cache files
-└── README.md                      # This file
+├── __pycache__/                           # Python cache files
+└── README.md                              # This file
 ```
 
 ## 🤖 Model Details
@@ -141,12 +219,19 @@ video-category-classification/
 - **N-gram Range**: Unigrams and bigrams (1-2 words)
 - **Document Frequency Filtering**: Terms in 5-80% of documents
 
-### Machine Learning Models
+### Machine Learning Approaches
 
-The pipeline trains and compares three algorithms:
+#### TF-IDF + SVM Approach (`video_category_classifier.py`)
+Trains and compares three algorithms on TF-IDF features:
 - **Logistic Regression**: Fast, interpretable baseline
 - **Random Forest**: Ensemble method, handles non-linear relationships
 - **SVM (Support Vector Machine)**: Best performer, selected as final model
+
+#### Bag-of-Words + Logistic Regression (`mark_of_youtube_transcript_project.py`)
+- **Count Vectorization**: Simple word frequency counting
+- **Logistic Regression**: Efficient classification for text data
+- **Stop Words Removal**: Improved feature quality
+- **Category-specific Analysis**: Word frequency visualization per category
 
 ## 📈 Performance Analysis
 
@@ -236,9 +321,24 @@ This project is open source. Feel free to use, modify, and distribute.
 
 ## 👥 Acknowledgments
 
-- Built with scikit-learn, pandas, and other open-source ML libraries
-- Inspired by YouTube content analysis and categorization challenges
-- Thanks to the open-source community for excellent ML tools
+- **Machine Learning**: Built with scikit-learn, pandas, and other open-source ML libraries
+- **Audio Processing**: yt-dlp for reliable YouTube audio downloads
+- **Speech Recognition**: OpenAI Whisper model for accurate transcription
+- **Translation**: Google Translate API via deep-translator library
+- **Visualization**: Matplotlib and Seaborn for data analysis plots
+- **Inspired by**: YouTube content analysis and categorization challenges
+- **Thanks to**: Open-source community for excellent ML and NLP tools
+
+## 🔄 Pipeline Options
+
+This project offers two approaches:
+
+1. **Complete Pipeline** (`mark_of_youtube_transcript_project.py`): End-to-end solution from YouTube URLs to categories (Colab-only)
+2. **Classification Only** (`video_category_classifier.py`): ML classification using existing transcript data
+
+Choose based on your needs:
+- Use the complete pipeline if you have raw YouTube data
+- Use classification scripts if you already have transcripts
 
 ---
 
